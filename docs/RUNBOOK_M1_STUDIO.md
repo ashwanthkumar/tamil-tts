@@ -41,11 +41,16 @@ parquet shard at a time and deletes it after extracting wavs, so peak disk stays
 ~1.6 GB of output wavs (works even with little free space):
 
 ```bash
-uv run python -m tamiltts.data.prepare --low-disk --speaker female --out data
+uv run python -m tamiltts.data.prepare --low-disk --speaker female --out data --stop-after-empty 2
 # -> data/wavs/*.wav (22.05kHz mono) + data/metadata_{train,val}.csv
 ```
 
-(On a Studio with plenty of disk you can drop `--low-disk` for a one-shot download instead.)
+`--stop-after-empty 2` exploits the fact that this corpus is speaker-contiguous (female =
+first ~6 shards, ~3,243 clips); it stops once female clips stop appearing, ~halving the download.
+Drop that flag (scan all 17 shards) if you ever want the male speaker instead (`--speaker male`,
+which lives in the later shards — don't combine it with early-stop).
+
+(On a Studio with plenty of disk you can also drop `--low-disk` for a one-shot full download.)
 
 Sanity check:
 ```bash

@@ -185,6 +185,7 @@ def prepare_sharded(
     target_sr: int = TARGET_SR,
     val_size: int = 100,
     limit: int | None = None,
+    stop_after_empty: int = 0,
 ) -> None:
     """Low-disk prep: download ONE parquet shard at a time, extract the wanted speaker's wavs,
     then delete the shard cache before fetching the next. Peak disk stays ~1 shard + output wavs,
@@ -219,7 +220,9 @@ def prepare_sharded(
 
     rows: list[tuple[str, str]] = []
     kept = 0
+    empty_streak = 0
     for si, shard in enumerate(shards):
+        kept_before = kept
         local = hf_hub_download(DATASET_ID, shard, repo_type="dataset")
         pf = pq.ParquetFile(local)
         names = pf.schema_arrow.names
@@ -261,6 +264,17 @@ def prepare_sharded(
         shutil.rmtree(hub_cache, ignore_errors=True)
         print(f"  shard {si + 1}/{len(shards)} done; kept={kept} clips so far", file=sys.stderr)
         if limit is not None and kept >= limit:
+            break
+
+        # This corpus stores each speaker contiguously, so once the wanted speaker's clips stop
+        # appearing we can skip the remaining (other-speaker) shards instead of downloading them.
+        empty_streak = empty_streak + 1 if kept == kept_before else 0
+        if stop_after_empty > 0 and empty_streak >= stop_after_empty and kept > 0:
+            print(
+                f"  no new {speaker} clips for {empty_streak} shards; stopping early "
+                f"(skipping {len(shards) - si - 1} remaining shards)",
+                file=sys.stderr,
+            )
             break
 
     if not rows:
@@ -309,6 +323,14 @@ def main() -> None:
         help="process one parquet shard at a time, deleting each before the next "
         "(handles the full corpus with only a few GB free)",
     )
+    p.add_argument(
+        "--stop-after-empty",
+        type=int,
+        default=0,
+        help="(low-disk) stop after N consecutive shards yield no wanted-speaker clips. "
+        "This corpus is speaker-contiguous (female = first ~6 shards), so --stop-after-empty 2 "
+        "skips the male shards and roughly halves the download. 0 = scan all shards.",
+    )
     args = p.parse_args()
 
     if args.low_disk:
@@ -318,6 +340,7 @@ def main() -> None:
             target_sr=args.sample_rate,
             val_size=args.val_size,
             limit=args.limit,
+            stop_after_empty=args.stop_after_empty,
         )
         return
 
