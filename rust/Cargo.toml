@@ -1,0 +1,22 @@
+[package]
+name = "tamil-tts"
+version = "0.1.0"
+edition = "2021"
+description = "Rust SDK for tamil-tts: ONNX VITS Tamil speech synthesis on CPU"
+license = "MIT"
+repository = "https://github.com/ashwanthkumar/tamil-tts"
+
+[lib]
+name = "tamil_tts"
+path = "src/lib.rs"
+
+[dependencies]
+ort = { version = "=2.0.0-rc.12" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+hound = "3"
+anyhow = "1"
+
+[[example]]
+name = "synthesize"
+path = "examples/synthesize.rs"
