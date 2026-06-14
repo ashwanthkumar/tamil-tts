@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# uv
+uv.lock
+
+# Data & training artifacts (large / regenerated)
+data/raw/
+data/wavs/
+data/*.parquet
+data/metadata*.csv
+runs/
+output/
+checkpoints/
+*.pth
+*.ckpt
+
+# Exported models are large; track via releases, not git
+models/*.onnx
+models/*.json
+!models/.gitkeep
+
+# Rust
+rust/target/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
