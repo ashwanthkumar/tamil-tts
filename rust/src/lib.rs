@@ -10,6 +10,7 @@
 mod phonemize;
 pub mod mlx_tts;
 pub mod mlx_ns_tts;
+pub mod normalize;
 
 use std::path::{Path, PathBuf};
 

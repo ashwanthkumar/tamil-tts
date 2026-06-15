@@ -18,6 +18,7 @@ from .audio import SR, mel_to_wav
 from .dataset import TTSData
 from .model import key_pad_mask
 from .model_ns import NSConfig, FastTTS, gather_expand
+from .normalize import normalize
 
 
 def load_model(run_dir: Path) -> FastTTS:
@@ -36,7 +37,7 @@ def predict_durations(model, enc, speed: float = 1.0) -> np.ndarray:
 
 
 def generate(model, data: TTSData, text: str, speed: float = 1.0, max_total: int = 4000):
-    tok_ids = data.encode_text(text)
+    tok_ids = data.encode_text(normalize(text))
     tok = mx.array([tok_ids], dtype=mx.int32)
     Tt = tok.shape[1]
     src = key_pad_mask(mx.array([Tt]), Tt)

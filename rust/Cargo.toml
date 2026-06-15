@@ -17,6 +17,7 @@ serde_json = "1"
 hound = "3"
 anyhow = "1"
 rustfft = "6"
+regex = "1"
 
 [[example]]
 name = "synthesize"
@@ -29,3 +30,7 @@ path = "examples/synthesize_mlx.rs"
 [[example]]
 name = "synthesize_ns"
 path = "examples/synthesize_ns.rs"
+
+[[example]]
+name = "normalize_check"
+path = "examples/normalize_check.rs"

@@ -66,6 +66,7 @@ impl MlxNsTts {
     pub fn sample_rate(&self) -> u32 { self.meta.audio.sr }
 
     fn encode(&self, text: &str) -> Vec<i64> {
+        let text = crate::normalize::normalize(text);   // verbalize acronyms/symbols/digits
         let mut ids = vec![BOS_ID];
         for ch in text.chars() {
             if let Some(&id) = self.meta.vocab.get(&ch.to_string()) { ids.push(id); }

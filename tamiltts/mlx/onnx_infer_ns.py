@@ -14,6 +14,8 @@ import numpy as np
 import onnxruntime as ort
 import soundfile as sf
 
+from .normalize import normalize
+
 BOS_ID, EOS_ID = 1, 2
 
 
@@ -31,6 +33,7 @@ class TamilNSTTS:
             if vocoder and Path(vocoder).exists() else None
 
     def encode_text(self, text):
+        text = normalize(text)   # verbalize acronyms/symbols/digits before char tokenization
         return np.array([[BOS_ID] + [self.vocab[c] for c in text if c in self.vocab] + [EOS_ID]], np.int64)
 
     def synth_mel(self, text, speed=1.0):
