@@ -3,8 +3,10 @@
   "width": 1280,
   "height": 720,
   "intro": 80,
-  "ack_start": 1546,
-  "total": 1726,
+  "ack_start": 1562,
+  "ack_audio": "ack.wav",
+  "ack_lead": 10,
+  "total": 1798,
   "segments": [
     {
       "file": "seg00.wav",

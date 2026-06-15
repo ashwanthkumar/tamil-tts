@@ -88,8 +88,11 @@ export const Intro: React.FC = () => {
         <Segment key={i} seg={seg} index={i} />
       ))}
 
-      {/* closing acknowledgment / thank-you */}
+      {/* closing acknowledgment / thank-you (with model voice-over) */}
       <Sequence from={(script as {ack_start: number}).ack_start}>
+        <Sequence from={(script as {ack_lead: number}).ack_lead}>
+          <Audio src={staticFile((script as {ack_audio: string}).ack_audio)} />
+        </Sequence>
         <AbsoluteFill style={{justifyContent: 'center', alignItems: 'center', padding: 100}}>
           <FadeUp at={4}>
             <div style={{fontFamily: tamilFont, fontSize: 100, color: 'white', fontWeight: 700}}>நன்றி</div>

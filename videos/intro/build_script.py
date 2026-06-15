@@ -36,7 +36,8 @@ SEGMENTS = [
 
 INTRO = 80          # title frames before first clip
 GAP = 16            # frames between clips
-ACK = 180           # frames for the closing acknowledgment / thank-you slide (~6s)
+# closing thank-you voice-over, spoken by the model (pure Tamil so it's in-vocab)
+ACK_TEXT = "இந்தத் தரவுத்தொகுப்பைப் பகிர்ந்த சென்னை ஐ.ஐ.டி. குழுவிற்கு எங்களின் மிக்க நன்றி."
 
 
 def gen(text: str, out: Path):
@@ -57,10 +58,18 @@ def main():
         segs.append({"file": f.name, "tamil": ta, "en": en, "start": cursor, "dur": df})
         print(f"seg{i:02d}: {dur:.2f}s -> {df}f  start={cursor}  | {en}")
         cursor += df + GAP
-    ack_start = cursor
-    total = ack_start + ACK
+    # closing thank-you voice-over
+    ack_file = PUB / "ack.wav"
+    gen(ACK_TEXT, ack_file)
+    ack_audio_dur = sf.info(ack_file).frames / sf.info(ack_file).samplerate
+    ack_audio_frames = round(ack_audio_dur * FPS)
+    print(f"ack: {ack_audio_dur:.2f}s -> {ack_audio_frames}f")
+    ack_start = cursor + GAP
+    ack_window = ack_audio_frames + 75          # lead-in + tail around the voice-over
+    total = ack_start + ack_window
     script = {"fps": FPS, "width": 1280, "height": 720, "intro": INTRO,
-              "ack_start": ack_start, "total": total, "segments": segs}
+              "ack_start": ack_start, "ack_audio": ack_file.name, "ack_lead": 10,
+              "total": total, "segments": segs}
     (SRC / "script.json").write_text(json.dumps(script, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"total {total} frames = {total/FPS:.1f}s -> wrote src/script.json")
 
