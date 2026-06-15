@@ -63,7 +63,7 @@ export const Intro: React.FC = () => {
       <AbsoluteFill style={{justifyContent: 'flex-end'}}>
         <div style={{height: 4, width: `${progress * 100}%`, background: ACCENT}} />
         <div style={{textAlign: 'center', fontFamily: SANS, fontSize: 20, color: '#5f7591', padding: '14px 0', letterSpacing: 1}}>
-          github.com/ashwanthkumar/tamil-tts-mlx
+          github.com/ashwanthkumar/tamil-tts
         </div>
       </AbsoluteFill>
 

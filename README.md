@@ -17,7 +17,7 @@ No GPU needed at inference; runs on any platform.
 
 ## Quick start
 
-Download the model assets from the [latest release](https://github.com/ashwanthkumar/tamil-tts-mlx/releases/latest)
+Download the model assets from the [latest release](https://github.com/ashwanthkumar/tamil-tts/releases/latest)
 into `models/` (`tamil_ns.enc_dur.onnx`, `tamil_ns.decoder.onnx`, `hifigan.onnx`, `tamil_ns.tokenizer.json`), then:
 
 **Python**
