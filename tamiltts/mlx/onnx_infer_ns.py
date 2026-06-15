@@ -28,9 +28,12 @@ class TamilNSTTS:
         self.mel_mean = np.array(meta["mel_mean"], np.float32)
         self.mel_std = np.array(meta["mel_std"], np.float32)
         self.a = meta["audio"]
-        # neural vocoder (HiFi-GAN) if available -> natural audio; else Griffin-Lim
-        self.voc = ort.InferenceSession(vocoder, providers=["CPUExecutionProvider"]) \
-            if vocoder and Path(vocoder).exists() else None
+        # neural vocoder (HiFi-GAN) is required
+        if not (vocoder and Path(vocoder).exists()):
+            raise FileNotFoundError(
+                f"HiFi-GAN vocoder not found at {vocoder} — it is required. Export it with "
+                "`uv run python -m tamiltts.mlx.export_hifigan` (see docs/MLX_RUNBOOK.md).")
+        self.voc = ort.InferenceSession(vocoder, providers=["CPUExecutionProvider"])
 
     def encode_text(self, text):
         text = normalize(text)   # verbalize acronyms/symbols/digits before char tokenization
@@ -48,16 +51,8 @@ class TamilNSTTS:
         return mel * self.mel_std + self.mel_mean
 
     def synth(self, text, speed=1.0):
-        a = self.a
         logmel = self.synth_mel(text, speed)               # (T, n_mels) denormalized log-mel
-        if self.voc is not None:                            # HiFi-GAN: mel (1, n_mels, T) -> wav
-            wav = self.voc.run(None, {"mel": logmel.T[None].astype(np.float32)})[0][0, 0]
-        else:                                               # Griffin-Lim fallback
-            import librosa
-            mel = np.exp(logmel.T)
-            S = librosa.feature.inverse.mel_to_stft(mel, sr=a["sr"], n_fft=a["n_fft"], power=1.0,
-                                                     fmin=a["fmin"], fmax=a["fmax"])
-            wav = librosa.griffinlim(S, n_iter=60, hop_length=a["hop"], win_length=a["win"]).astype(np.float32)
+        wav = self.voc.run(None, {"mel": logmel.T[None].astype(np.float32)})[0][0, 0]  # HiFi-GAN
         p = np.abs(wav).max()
         return wav * (0.95 / p) if p > 1e-6 else wav
 

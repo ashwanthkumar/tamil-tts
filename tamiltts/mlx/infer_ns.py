@@ -15,33 +15,31 @@ import mlx.core as mx
 import numpy as np
 import soundfile as sf
 
-from .audio import SR, mel_to_wav
+from .audio import SR
 from .dataset import TTSData
 from .model import key_pad_mask
 from .model_ns import NSConfig, FastTTS, gather_expand
 from .normalize import normalize
 
-# HiFi-GAN ONNX vocoder (natural audio); falls back to Griffin-Lim if absent. Loaded once.
+HIFIGAN_PATH = "models/hifigan.onnx"
 _VOC = "unset"
 
 
-def _vocoder(path: str = "models/hifigan.onnx"):
+def _vocoder(path: str = HIFIGAN_PATH):
     global _VOC
     if _VOC == "unset":
-        try:
-            import onnxruntime as ort
-            _VOC = ort.InferenceSession(path, providers=["CPUExecutionProvider"]) if Path(path).exists() else None
-        except Exception:
-            _VOC = None
+        if not Path(path).exists():
+            raise FileNotFoundError(
+                f"HiFi-GAN vocoder not found at {path} — it is required. Export it with "
+                "`uv run python -m tamiltts.mlx.export_hifigan` (see docs/MLX_RUNBOOK.md).")
+        import onnxruntime as ort
+        _VOC = ort.InferenceSession(path, providers=["CPUExecutionProvider"])
     return _VOC
 
 
 def vocode(logmel: np.ndarray) -> np.ndarray:
-    """Denormalized (T, 80) log-mel -> waveform via HiFi-GAN ONNX, else Griffin-Lim."""
-    voc = _vocoder()
-    if voc is not None:
-        return voc.run(None, {"mel": logmel.T[None].astype(np.float32)})[0][0, 0]
-    return mel_to_wav(logmel)
+    """Denormalized (T, 80) log-mel -> waveform via the (required) HiFi-GAN ONNX vocoder."""
+    return _vocoder().run(None, {"mel": logmel.T[None].astype(np.float32)})[0][0, 0]
 
 
 def load_model(run_dir: Path) -> FastTTS:
