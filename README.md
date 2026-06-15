@@ -13,7 +13,7 @@ No GPU needed at inference; runs on any platform.
 
 [![Tamil TTS demo — click to play](videos/poster.png)](videos/intro.mp4)
 
-▶ [Play intro](videos/intro.mp4) (Tamil text + synthesized voice). Samples: [demo1](samples/demo1.mp4) · [demo2](samples/demo2.mp4).
+▶ [Play the ~1 min demo](videos/intro.mp4) — model-narrated intro + voice samples, with English subtitles. Built with Remotion ([`videos/intro/`](videos/intro/)).
 
 ## Quick start
 

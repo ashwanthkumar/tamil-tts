@@ -35,9 +35,10 @@ models/*.json
 # Rust
 rust/target/
 
-# Remotion (video tooling) — keep source, ignore deps/build
+# Remotion (video tooling) — keep source, ignore deps/build/regenerable audio
 node_modules/
 videos/intro/out/
+videos/intro/public/*.wav
 
 # Working notes (local)
 todo.md
